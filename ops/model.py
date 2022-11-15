@@ -245,7 +245,7 @@ class Model:
                 meta=True)
             meta = typing.cast('_SecretGetMetadataDict', meta)
 
-        except SecretOwnershipError:  # let other types raise
+        except (SecretOwnershipError, ModelError):  # let other types raise
             # the call failed. We do not own the secret, and id/label are only
             # known if we provided them.
             # however, unless we call secret_get again without meta, Juju
@@ -2777,8 +2777,11 @@ class _ModelBackend:
             args.append(id)
         if unit_id is not None:
             args += ['--unit', str(unit_id)]
+        """
+        # --label not supported for secret-grant
         if label is not None:
             args += ['--label', str(label)]
+        """
         self._run('secret-grant', '--relation', str(relation_id), *args)
 
     def secret_revoke(self, *, id: Optional[str] = None,
